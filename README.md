@@ -514,6 +514,215 @@ Production-optimized build artifacts will be in the dist/ directory.
 
 ---
 
+## Deployment Guide
+
+### Option 1: Vercel (Recommended - Easiest)
+
+Vercel is ideal for React apps and provides free hosting with serverless functions.
+
+Prerequisites:
+- Vercel account (free at vercel.com)
+- GitHub account with FlowSense repository
+
+Steps:
+
+1. Connect your GitHub repository:
+   - Go to https://vercel.com/new
+   - Click "Import Git Repository"
+   - Select your NupoorYadu/FlowSense repository
+   - Click "Import"
+
+2. Configure the project:
+   - Framework Preset: Vite
+   - Root Directory: ./
+   - Build Command: npm run build
+   - Output Directory: dist
+   - Environment Variables: (leave empty for now)
+
+3. Deploy:
+   - Click "Deploy"
+   - Vercel will automatically build and deploy
+   - Your app will be live at https://[project-name].vercel.app
+
+4. Backend API (optional):
+   - For FastAPI backend, deploy separately to:
+     - Railway (recommended)
+     - Heroku
+     - Render
+   - Update frontend API URL in workflowApi.ts to point to deployed backend
+
+Automatic deployment: Every push to main branch automatically triggers a new deployment.
+
+### Option 2: Netlify
+
+Similar to Vercel with good free tier.
+
+Steps:
+
+1. Connect repository:
+   - Go to app.netlify.com
+   - Click "New site from Git"
+   - Select GitHub and choose FlowSense repository
+
+2. Build settings:
+   - Build command: npm run build
+   - Publish directory: dist
+
+3. Deploy:
+   - Click "Deploy site"
+   - Your app will be live at https://[site-name].netlify.app
+
+### Option 3: Railway (Full-Stack Deployment)
+
+Deploy both frontend and backend on a single platform.
+
+Steps:
+
+1. Connect repository:
+   - Go to https://railway.app
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Choose NupoorYadu/FlowSense
+
+2. Add services:
+   - Add Node service for frontend
+   - Add Python service for backend
+   - Configure environment variables as needed
+
+3. Deploy:
+   - Railway automatically builds and deploys on every push
+   - Frontend and backend run in the same project
+
+### Option 4: Docker + Cloud Platforms
+
+For maximum control, use Docker containers.
+
+1. Create Dockerfile for frontend:
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "run", "preview"]
+```
+
+2. Create Dockerfile for backend (if needed):
+```dockerfile
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["python", "main.py"]
+```
+
+3. Deploy to:
+   - Google Cloud Run
+   - AWS ECS
+   - Azure Container Instances
+   - DigitalOcean App Platform
+
+### Option 5: Traditional VPS Hosting
+
+For more control and custom setup.
+
+Requirements:
+- VPS (DigitalOcean, Linode, AWS EC2, etc.)
+- Domain name
+- SSH access
+
+Steps:
+
+1. SSH into your server:
+```bash
+ssh root@your.server.ip
+```
+
+2. Install dependencies:
+```bash
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+sudo apt-get install -y python3 python3-pip
+```
+
+3. Clone repository:
+```bash
+git clone https://github.com/NupoorYadu/FlowSense.git
+cd FlowSense/hr-workflow-designer
+```
+
+4. Setup frontend:
+```bash
+npm install
+npm run build
+npm install -g serve
+serve -s dist -l 3000 &
+```
+
+5. Setup backend (optional):
+```bash
+cd ../backend
+pip install -r requirements.txt
+nohup python main.py &
+```
+
+6. Setup reverse proxy with Nginx:
+```bash
+sudo apt-get install -y nginx
+# Create /etc/nginx/sites-available/flowsense config
+# Point to your frontend on port 3000 and backend on port 8000
+sudo systemctl start nginx
+```
+
+7. Enable HTTPS:
+```bash
+sudo apt-get install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d yourdomain.com
+```
+
+### Environment Variables
+
+Create a .env file in the root directory:
+
+```
+VITE_API_URL=https://your-backend-url.com/api
+VITE_APP_NAME=FlowSense
+```
+
+Update src/designer/api/workflowApi.ts to use:
+```typescript
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+```
+
+### Monitoring and Maintenance
+
+1. Error tracking:
+   - Setup Sentry for error monitoring
+   - Log to CloudWatch, Datadog, or New Relic
+
+2. Performance monitoring:
+   - Use Google Analytics or Posthog
+   - Monitor Core Web Vitals
+
+3. Uptime monitoring:
+   - Use Uptime Robot (free tier available)
+   - Get alerts if app goes down
+
+### Choosing the Right Option
+
+- **Easiest**: Vercel or Netlify (free tier, no backend needed)
+- **Best for frontend + backend**: Railway or Docker + Cloud Run
+- **Most control**: VPS with custom setup
+- **Full enterprise features**: AWS, Google Cloud, Azure
+
+Recommended for Tredence internship submission: Deploy to Vercel for frontend, Railway for backend (if needed). This demonstrates DevOps understanding while keeping setup simple.
+
+---
+
 ## Usage Guide
 
 ### Creating a Workflow
