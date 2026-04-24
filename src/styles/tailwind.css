@@ -1,2 +1,100 @@
 @import 'tailwindcss' source(none);
 @source '../**/*.{js,ts,jsx,tsx}';
+
+@layer utilities {
+  /* Dotted patterns */
+  .dotted-bg {
+    background-image: 
+      radial-gradient(circle, #93c5fd 0.5px, transparent 0.5px);
+    background-size: 15px 15px;
+  }
+
+  .dotted-pattern {
+    background-image: 
+      linear-gradient(to right, rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .dotted-divider {
+    border-top: 2px dotted rgba(100, 116, 139, 0.3);
+  }
+
+  .dotted-border {
+    border: 2px dotted rgba(148, 163, 175, 0.5);
+  }
+
+  /* Animation utilities */
+  .animate-pulse-glow {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-slide-in-bounce {
+    animation: slide-in-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes slide-in-bounce {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Glass morphism effects */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-dark {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Gradient effects */
+  .gradient-glow {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.8), rgba(168, 85, 247, 0.8));
+    filter: blur(40px);
+  }
+
+  /* Dotted line connector */
+  .dotted-line {
+    stroke-dasharray: 5, 5;
+    stroke-dashoffset: 0;
+    animation: dash 20s linear infinite;
+  }
+
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -10;
+    }
+  }
+}

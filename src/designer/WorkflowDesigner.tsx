@@ -25,8 +25,11 @@ import { SmartSuggestions } from './components/SmartSuggestions';
 import { WelcomeOverlay } from './components/WelcomeOverlay';
 import { EmptyCanvasState } from './components/EmptyCanvasState';
 import { WorkflowStats } from './components/WorkflowStats';
+import { WorkflowIOPanel } from './components/WorkflowIOPanel';
+import { MetricsBadge, WorkflowMetricsDisplay } from './components/MetricsDisplay';
 import { NODE_DEFINITIONS } from './config/nodeDefinitions';
 import { WorkflowNodeData, NodeDefinition, RiskIssue, SimulationStep } from './types/workflow';
+import { MetricsCalculator } from './utils/metricsCalculator';
 
 const nodeTypes = Object.freeze({
   custom: InteractiveNodeCard,
@@ -37,6 +40,8 @@ const tabs = [
   { value: 'explanation', label: 'Explanation', icon: LucideIcons.FileText, accent: 'purple' },
   { value: 'risks', label: 'Risks', icon: LucideIcons.Shield, accent: 'orange' },
   { value: 'simulation', label: 'Simulation', icon: LucideIcons.Play, accent: 'green' },
+  { value: 'metrics', label: 'Analytics', icon: LucideIcons.BarChart3, accent: 'cyan' },
+  { value: 'export', label: 'Export', icon: LucideIcons.FileUp, accent: 'indigo' },
 ];
 
 const getTabClasses = (accent: string, isActive: boolean) => {
@@ -45,6 +50,8 @@ const getTabClasses = (accent: string, isActive: boolean) => {
     purple: 'text-purple-600',
     orange: 'text-orange-600',
     green: 'text-green-600',
+    cyan: 'text-cyan-600',
+    indigo: 'text-indigo-600',
   }[accent] || 'text-blue-600';
 
   return `relative px-4 py-2.5 text-sm font-bold transition-all hover:text-gray-900 ${isActive ? activeText : 'text-gray-600'}`;
@@ -56,6 +63,8 @@ const getTabIndicatorClasses = (accent: string, isActive: boolean) => {
     purple: 'from-purple-600 to-pink-600 shadow-purple-500/50',
     orange: 'from-orange-600 to-red-600 shadow-orange-500/50',
     green: 'from-green-600 to-emerald-600 shadow-green-500/50',
+    cyan: 'from-cyan-600 to-blue-600 shadow-cyan-500/50',
+    indigo: 'from-indigo-600 to-purple-600 shadow-indigo-500/50',
   }[accent] || 'from-blue-600 to-indigo-600 shadow-blue-500/50';
 
   return `absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${gradient} rounded-full shadow-lg transition-transform ${isActive ? 'scale-x-100' : 'scale-x-0'}`;
@@ -78,6 +87,16 @@ export function WorkflowDesigner() {
     localStorage.setItem('workflow-designer-welcome-seen', 'true');
     setShowWelcome(false);
   }, []);
+
+  const handleWorkflowImport = useCallback(
+    (importedNodes: Node<WorkflowNodeData>[], importedEdges: Edge[]) => {
+      setNodes(importedNodes);
+      setEdges(importedEdges);
+      setSelectedNode(null);
+      alert('Workflow imported successfully!');
+    },
+    [setNodes, setEdges]
+  );
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -340,7 +359,13 @@ export function WorkflowDesigner() {
     <>
       {showWelcome && <WelcomeOverlay onClose={closeWelcome} />}
       <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5Q0EzQUYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMy4zMS0yLjY5LTYtNi02cy02IDIuNjktNiA2YzAgMy4zMSAyLjY5IDYgNiA2czYtMi42OSA2LTZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40" />
+        {/* Dotted pattern background */}
+        <div className="absolute inset-0 dotted-pattern opacity-50 pointer-events-none" />
+        
+        {/* Gradient glow elements */}
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" />
+        <div className="absolute top-40 right-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-8 right-1/3 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '4s' }} />
 
       <div className="relative w-64 bg-white/80 backdrop-blur-xl border-r border-white/60 shadow-2xl p-4 overflow-y-auto">
         <div className="mb-6">
@@ -490,6 +515,38 @@ export function WorkflowDesigner() {
                 onStepChange={handleSimulationStepChange}
                 onActiveNodeChange={(nodeId) => setHighlightedNodeId(nodeId)}
               />
+            )}
+
+            {activeTab === 'metrics' && (
+              <div className="space-y-4">
+                {(() => {
+                  const metrics = MetricsCalculator.calculateWorkflowMetrics(nodes, edges);
+                  return (
+                    <WorkflowMetricsDisplay
+                      overallHealth={metrics.overallHealth}
+                      performanceScore={metrics.performanceScore}
+                      complexityScore={metrics.complexityScore}
+                      totalNodes={metrics.totalNodes}
+                      totalEdges={metrics.totalEdges}
+                      criticalPaths={metrics.criticalPaths}
+                    />
+                  );
+                })()}
+
+                {selectedNode && (() => {
+                  const nodeMetrics = MetricsCalculator.calculateNodeMetrics(selectedNode.id, nodes, edges);
+                  return (
+                    <div>
+                      <h3 className="font-bold text-gray-900 mb-3">Selected Node Metrics</h3>
+                      <MetricsBadge metrics={nodeMetrics} />
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {activeTab === 'export' && (
+              <WorkflowIOPanel nodes={nodes} edges={edges} onImport={handleWorkflowImport} />
             )}
           </div>
         </div>
