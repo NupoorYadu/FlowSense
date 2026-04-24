@@ -392,7 +392,7 @@ Start → Collect Documents (HR)
 
 ---
 
-## 🎓 Learning Opportunities
+## Learning Opportunities
 
 This project demonstrates:
 
