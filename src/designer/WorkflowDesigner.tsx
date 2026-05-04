@@ -31,6 +31,7 @@ import { NODE_DEFINITIONS } from './config/nodeDefinitions';
 import { WorkflowNodeData, NodeDefinition, RiskIssue, SimulationStep } from './types/workflow';
 import { MetricsCalculator } from './utils/metricsCalculator';
 
+// Build: 2026-05-04 with full tab support
 const nodeTypes = Object.freeze({
   custom: InteractiveNodeCard,
 });
