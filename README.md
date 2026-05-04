@@ -2,7 +2,7 @@
 
 A production-grade intelligent HR workflow builder with explainability, risk analysis, simulation, advanced analytics, and workflow persistence capabilities. Built with React, TypeScript, and React Flow.
 
-🚀 **[Live Demo](https://hr-workflow-flowsense.vercel.app)** - Try it now!
+🚀 **[Live Demo](https://hr-workflow-designer.vercel.app)** - Try it now!
 
 ## Problem Statement
 
